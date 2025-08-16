@@ -458,7 +458,7 @@ export default Welcome;`,
       </div>
 
       <Dialog open={isLessonModalOpen} onOpenChange={setIsLessonModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="text-2xl font-bold flex items-center gap-3">
@@ -514,17 +514,25 @@ export default Welcome;`,
                 <p className="text-muted-foreground leading-relaxed">{selectedLesson.content.summary}</p>
               </div>
 
-              <div className="flex gap-2 pt-4 border-t">
-                <Button onClick={closeLessonModal} variant="outline" className="flex-1 bg-transparent">
-                  Close Lesson
+              <div className="flex gap-3 pt-6 border-t">
+                <Button
+                  onClick={() => handleLearnLesson(selectedLesson.id)}
+                  className="flex-1 h-12 text-lg font-semibold bg-primary hover:bg-primary/90"
+                >
+                  <PlayCircle className="w-5 h-5 mr-2" />
+                  Continue Learning
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => {
                     handleStudied(selectedLesson.id)
                   }}
+                  className="h-12 px-6 bg-transparent"
                 >
                   Mark as Completed
+                </Button>
+                <Button onClick={closeLessonModal} variant="outline" className="h-12 px-6 bg-transparent">
+                  Close Lesson
                 </Button>
               </div>
             </div>
