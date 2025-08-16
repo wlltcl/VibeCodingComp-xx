@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -19,7 +19,12 @@ interface Lesson {
   icon: string
 }
 
-export function LessonsList() {
+interface LessonsListProps {
+  selectedLessonId?: string | null
+  onLessonSelect?: (lessonId: string | null) => void
+}
+
+export function LessonsList({ selectedLessonId, onLessonSelect }: LessonsListProps) {
   const [lessons, setLessons] = useState<Lesson[]>([
     {
       id: "1",
@@ -133,6 +138,21 @@ export function LessonsList() {
     )
   }
 
+  useEffect(() => {
+    if (selectedLessonId) {
+      const element = document.getElementById(`lesson-${selectedLessonId}`)
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" })
+        // Clear the selection after a brief delay
+        setTimeout(() => {
+          if (onLessonSelect) {
+            onLessonSelect(null)
+          }
+        }, 2000)
+      }
+    }
+  }, [selectedLessonId, onLessonSelect])
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -151,7 +171,10 @@ export function LessonsList() {
         {lessons.map((lesson) => (
           <Card
             key={lesson.id}
-            className={`p-6 bg-card border-border border-l-4 ${getCategoryColor(lesson.category)} hover:shadow-lg transition-shadow`}
+            id={`lesson-${lesson.id}`}
+            className={`p-6 bg-card border-border border-l-4 ${getCategoryColor(lesson.category)} hover:shadow-lg transition-all duration-300 ${
+              selectedLessonId === lesson.id ? "ring-2 ring-primary shadow-lg scale-[1.02]" : ""
+            }`}
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">

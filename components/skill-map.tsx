@@ -21,7 +21,11 @@ interface SkillNode {
   icon: string
 }
 
-export function SkillMap() {
+interface SkillMapProps {
+  onNavigateToLesson?: (skillId: string) => void
+}
+
+export function SkillMap({ onNavigateToLesson }: SkillMapProps) {
   const [selectedSkill, setSelectedSkill] = useState<SkillNode | null>(null)
   const [scale, setScale] = useState(1)
   const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -228,8 +232,9 @@ export function SkillMap() {
 
   const handleLearnSkill = (skillId: string) => {
     console.log(`[v0] Starting to learn skill: ${skillId}`)
-    // This would typically update the skill progress and user stats
-    // For now, we'll just log the action
+    if (onNavigateToLesson) {
+      onNavigateToLesson(skillId)
+    }
     setSelectedSkill(null) // Close the preview after starting to learn
   }
 
