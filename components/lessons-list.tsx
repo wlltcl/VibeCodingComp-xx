@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { BookOpen, Clock, CheckCircle, PlayCircle, X } from "lucide-react"
+import { BookOpen, Clock, CheckCircle, PlayCircle, X, Lock } from "lucide-react"
 
 interface Lesson {
   id: string
@@ -18,7 +18,8 @@ interface Lesson {
   completed: boolean
   difficulty: "beginner" | "intermediate" | "advanced"
   icon: string
-  skillId?: string // Added skillId to map lessons to skills
+  skillId?: string
+  prerequisites?: string[]
   content: {
     introduction: string
     sections: Array<{
@@ -33,8 +34,8 @@ interface Lesson {
 interface LessonsListProps {
   selectedLessonId?: string | null
   onLessonSelect?: (lessonId: string | null) => void
-  onLessonComplete?: (skillId: string) => void // Added callback for lesson completion
-  completedLessons?: string[] // Added completedLessons prop to sync with persistent state
+  onLessonComplete?: (skillId: string) => void
+  completedLessons?: string[]
 }
 
 export function LessonsList({
@@ -54,7 +55,8 @@ export function LessonsList({
       completed: true,
       difficulty: "beginner",
       icon: "🌐",
-      skillId: "html", // Added skillId mapping
+      skillId: "html",
+      prerequisites: [],
       content: {
         introduction:
           "HTML (HyperText Markup Language) is the standard markup language for creating web pages. It describes the structure of a web page using elements and tags.",
@@ -95,7 +97,8 @@ export function LessonsList({
       completed: false,
       difficulty: "beginner",
       icon: "🎨",
-      skillId: "css", // Added skillId mapping
+      skillId: "css",
+      prerequisites: ["1"],
       content: {
         introduction:
           "CSS (Cascading Style Sheets) is used to style and layout web pages. It controls colors, fonts, spacing, and positioning.",
@@ -137,7 +140,8 @@ h1 { color: blue; }
       completed: false,
       difficulty: "intermediate",
       icon: "⚡",
-      skillId: "js", // Added skillId mapping
+      skillId: "js",
+      prerequisites: ["1", "2"],
       content: {
         introduction:
           "JavaScript is a programming language that adds interactivity to web pages. It can manipulate HTML elements, handle events, and create dynamic content.",
@@ -176,7 +180,8 @@ console.log(result);`,
       completed: false,
       difficulty: "beginner",
       icon: "🐍",
-      skillId: "python", // Added skillId mapping
+      skillId: "python",
+      prerequisites: [],
       content: {
         introduction:
           "Python is a versatile, beginner-friendly programming language known for its simple syntax and powerful capabilities.",
@@ -206,7 +211,8 @@ print(f"Welcome to {name} {version}!")`,
       completed: false,
       difficulty: "beginner",
       icon: "🎭",
-      skillId: "design", // Added skillId mapping
+      skillId: "design",
+      prerequisites: [],
       content: {
         introduction:
           "Good design principles create visually appealing and user-friendly interfaces that communicate effectively.",
@@ -234,7 +240,8 @@ print(f"Welcome to {name} {version}!")`,
       completed: false,
       difficulty: "advanced",
       icon: "⚛️",
-      skillId: "react", // Added skillId mapping
+      skillId: "react",
+      prerequisites: ["1", "2", "3"],
       content: {
         introduction:
           "React components are the building blocks of React applications, allowing you to create reusable UI elements.",
@@ -256,6 +263,29 @@ export default Welcome;`,
 
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false)
+
+  const arePrerequisitesMet = (lesson: Lesson): boolean => {
+    if (!lesson.prerequisites || lesson.prerequisites.length === 0) {
+      return true
+    }
+    return lesson.prerequisites.every((prereqId) => {
+      const prereqLesson = lessons.find((l) => l.id === prereqId)
+      return prereqLesson?.completed || false
+    })
+  }
+
+  const getMissingPrerequisites = (lesson: Lesson): string[] => {
+    if (!lesson.prerequisites) return []
+    return lesson.prerequisites
+      .filter((prereqId) => {
+        const prereqLesson = lessons.find((l) => l.id === prereqId)
+        return !prereqLesson?.completed
+      })
+      .map((prereqId) => {
+        const prereqLesson = lessons.find((l) => l.id === prereqId)
+        return prereqLesson?.title || `Lesson ${prereqId}`
+      })
+  }
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -303,31 +333,34 @@ export default Welcome;`,
   }
 
   const handleLearnLesson = (lessonId: string) => {
-    console.log(`Opening lesson content for: ${lessonId}`)
     const lesson = lessons.find((l) => l.id === lessonId)
-    if (lesson) {
-      setSelectedLesson(lesson)
-      setIsLessonModalOpen(true)
-      setLessons((prevLessons) =>
-        prevLessons.map((lesson) => {
-          if (lesson.id === lessonId) {
-            const newProgress = lesson.progress === 0 ? 25 : Math.min(100, lesson.progress + 25)
-            const isCompleted = newProgress === 100
 
-            saveLessonProgress(lessonId, newProgress)
-
-            if (isCompleted && lesson.skillId && onLessonComplete) {
-              setTimeout(() => {
-                onLessonComplete(lesson.skillId!)
-              }, 0)
-            }
-
-            return { ...lesson, progress: newProgress, completed: isCompleted }
-          }
-          return lesson
-        }),
-      )
+    if (!lesson || !arePrerequisitesMet(lesson)) {
+      return
     }
+
+    console.log(`Opening lesson content for: ${lessonId}`)
+    setSelectedLesson(lesson)
+    setIsLessonModalOpen(true)
+    setLessons((prevLessons) =>
+      prevLessons.map((lesson) => {
+        if (lesson.id === lessonId) {
+          const newProgress = lesson.progress === 0 ? 25 : Math.min(100, lesson.progress + 25)
+          const isCompleted = newProgress === 100
+
+          saveLessonProgress(lessonId, newProgress)
+
+          if (isCompleted && lesson.skillId && onLessonComplete) {
+            setTimeout(() => {
+              onLessonComplete(lesson.skillId!)
+            }, 0)
+          }
+
+          return { ...lesson, progress: newProgress, completed: isCompleted }
+        }
+        return lesson
+      }),
+    )
   }
 
   const closeLessonModal = () => {
@@ -378,83 +411,108 @@ export default Welcome;`,
           <Badge variant="outline" className="border-blue-500 text-blue-400">
             {lessons.filter((l) => l.progress > 0 && !l.completed).length} In Progress
           </Badge>
+          <Badge variant="outline" className="border-red-500 text-red-400">
+            {lessons.filter((l) => !arePrerequisitesMet(l)).length} Locked
+          </Badge>
         </div>
       </div>
 
       <div className="grid gap-4">
-        {lessons.map((lesson) => (
-          <Card
-            key={lesson.id}
-            id={`lesson-${lesson.id}`}
-            className={`p-6 bg-card border-border border-l-4 ${getCategoryColor(lesson.category)} hover:shadow-lg transition-all duration-300 ${
-              selectedLessonId === lesson.id ? "ring-2 ring-primary shadow-lg scale-[1.02]" : ""
-            }`}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="text-2xl">{lesson.icon}</div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                      {lesson.title}
-                      {lesson.completed && <CheckCircle className="w-5 h-5 text-green-500" />}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="text-xs">
-                        {lesson.category}
-                      </Badge>
-                      <Badge className={`text-xs text-white ${getDifficultyColor(lesson.difficulty)}`}>
-                        {lesson.difficulty}
-                      </Badge>
+        {lessons.map((lesson) => {
+          const isAccessible = arePrerequisitesMet(lesson)
+          const missingPrereqs = getMissingPrerequisites(lesson)
+
+          return (
+            <Card
+              key={lesson.id}
+              id={`lesson-${lesson.id}`}
+              className={`p-6 bg-card border-border border-l-4 ${getCategoryColor(lesson.category)} hover:shadow-lg transition-all duration-300 ${
+                selectedLessonId === lesson.id ? "ring-2 ring-primary shadow-lg scale-[1.02]" : ""
+              } ${!isAccessible ? "opacity-60" : ""}`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="text-2xl">{lesson.icon}</div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                        {lesson.title}
+                        {lesson.completed && <CheckCircle className="w-5 h-5 text-green-500" />}
+                        {!isAccessible && <Lock className="w-5 h-5 text-red-500" />}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">
+                          {lesson.category}
+                        </Badge>
+                        <Badge className={`text-xs text-white ${getDifficultyColor(lesson.difficulty)}`}>
+                          {lesson.difficulty}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <p className="text-muted-foreground mb-4">{lesson.description}</p>
+                  <p className="text-muted-foreground mb-4">{lesson.description}</p>
 
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4" />
-                    {lesson.duration} min
+                  {!isAccessible && missingPrereqs.length > 0 && (
+                    <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <p className="text-sm text-red-700 dark:text-red-400 font-medium mb-1">Prerequisites required:</p>
+                      <p className="text-sm text-red-600 dark:text-red-300">Complete: {missingPrereqs.join(", ")}</p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Clock className="w-4 h-4" />
+                      {lesson.duration} min
+                    </div>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <BookOpen className="w-4 h-4" />
+                      {lesson.progress}% complete
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <BookOpen className="w-4 h-4" />
-                    {lesson.progress}% complete
+
+                  <div className="space-y-2">
+                    <Progress value={lesson.progress} className="h-2" />
+                    <div className="text-xs text-muted-foreground">Progress: {lesson.progress}%</div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Progress value={lesson.progress} className="h-2" />
-                  <div className="text-xs text-muted-foreground">Progress: {lesson.progress}%</div>
-                </div>
-              </div>
-
-              <div className="ml-6 flex flex-col gap-2">
-                {lesson.completed ? (
-                  <Button variant="outline" disabled className="w-32 bg-transparent">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Studied
-                  </Button>
-                ) : lesson.progress > 0 ? (
-                  <>
+                <div className="ml-6 flex flex-col gap-2">
+                  {lesson.completed ? (
+                    <Button variant="outline" disabled className="w-32 bg-transparent">
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Studied
+                    </Button>
+                  ) : !isAccessible ? (
+                    <Button variant="outline" disabled className="w-32 bg-transparent">
+                      <Lock className="w-4 h-4 mr-2" />
+                      Locked
+                    </Button>
+                  ) : lesson.progress > 0 ? (
+                    <>
+                      <Button className="w-32" onClick={() => handleLearnLesson(lesson.id)}>
+                        <PlayCircle className="w-4 h-4 mr-2" />
+                        Continue
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-32 bg-transparent"
+                        onClick={() => handleStudied(lesson.id)}
+                      >
+                        Mark Studied
+                      </Button>
+                    </>
+                  ) : (
                     <Button className="w-32" onClick={() => handleLearnLesson(lesson.id)}>
                       <PlayCircle className="w-4 h-4 mr-2" />
-                      Continue
+                      Start Learning
                     </Button>
-                    <Button variant="outline" className="w-32 bg-transparent" onClick={() => handleStudied(lesson.id)}>
-                      Mark Studied
-                    </Button>
-                  </>
-                ) : (
-                  <Button className="w-32" onClick={() => handleLearnLesson(lesson.id)}>
-                    <PlayCircle className="w-4 h-4 mr-2" />
-                    Start Learning
-                  </Button>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          )
+        })}
       </div>
 
       <Dialog open={isLessonModalOpen} onOpenChange={setIsLessonModalOpen}>
