@@ -46,17 +46,45 @@ export function LessonsList({
 }: LessonsListProps) {
   const [lessons, setLessons] = useState<Lesson[]>([
     {
+      id: "0",
+      title: "Learning Journey Begins",
+      description: "Welcome to your personalized learning adventure",
+      category: "Core",
+      duration: 15,
+      progress: 0,
+      completed: false,
+      difficulty: "beginner",
+      icon: "🎯",
+      skillId: "start",
+      prerequisites: [],
+      content: {
+        introduction:
+          "Welcome to your learning journey! This is where your adventure begins. You'll discover new skills, build projects, and grow as a developer.",
+        sections: [
+          {
+            title: "Setting Your Goals",
+            content: "Define what you want to achieve and create a roadmap for success.",
+          },
+          {
+            title: "Learning Methodology",
+            content: "Understand how to learn effectively and retain knowledge through practice.",
+          },
+        ],
+        summary: "Your learning journey starts here. Set goals, stay motivated, and enjoy the process of growth.",
+      },
+    },
+    {
       id: "1",
       title: "Introduction to HTML",
       description: "Learn the basics of HTML structure and semantic elements",
       category: "Web Development",
       duration: 45,
-      progress: 100,
-      completed: true,
+      progress: 0,
+      completed: false,
       difficulty: "beginner",
       icon: "🌐",
       skillId: "html",
-      prerequisites: [],
+      prerequisites: ["0"],
       content: {
         introduction:
           "HTML (HyperText Markup Language) is the standard markup language for creating web pages. It describes the structure of a web page using elements and tags.",
@@ -93,7 +121,7 @@ export function LessonsList({
       description: "Master styling with CSS properties and selectors",
       category: "Web Development",
       duration: 60,
-      progress: 75,
+      progress: 0,
       completed: false,
       difficulty: "beginner",
       icon: "🎨",
@@ -136,12 +164,12 @@ h1 { color: blue; }
       description: "Understanding variables, functions, and DOM manipulation",
       category: "Programming",
       duration: 90,
-      progress: 30,
+      progress: 0,
       completed: false,
       difficulty: "intermediate",
       icon: "⚡",
       skillId: "js",
-      prerequisites: ["1", "2"],
+      prerequisites: ["1"],
       content: {
         introduction:
           "JavaScript is a programming language that adds interactivity to web pages. It can manipulate HTML elements, handle events, and create dynamic content.",
@@ -172,6 +200,53 @@ console.log(result);`,
     },
     {
       id: "4",
+      title: "React Components",
+      description: "Build reusable UI components with React",
+      category: "Web Development",
+      duration: 150,
+      progress: 0,
+      completed: false,
+      difficulty: "advanced",
+      icon: "⚛️",
+      skillId: "react",
+      prerequisites: ["3"],
+      content: {
+        introduction:
+          "React components are the building blocks of React applications, allowing you to create reusable UI elements.",
+        sections: [
+          {
+            title: "Functional Components",
+            content: "Learn how to create components using functions.",
+            codeExample: `function Welcome(props) {
+  return <h1>Hello, {props.name}!</h1>;
+}
+
+export default Welcome;`,
+          },
+          {
+            title: "Props and State",
+            content: "Understanding how to pass data and manage component state.",
+            codeExample: `import { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+  
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+    </div>
+  );
+}`,
+          },
+        ],
+        summary: "React components enable modular, maintainable code that scales with your application's complexity.",
+      },
+    },
+    {
+      id: "5",
       title: "Python for Beginners",
       description: "Start your programming journey with Python",
       category: "Programming",
@@ -181,7 +256,7 @@ console.log(result);`,
       difficulty: "beginner",
       icon: "🐍",
       skillId: "python",
-      prerequisites: [],
+      prerequisites: ["0"],
       content: {
         introduction:
           "Python is a versatile, beginner-friendly programming language known for its simple syntax and powerful capabilities.",
@@ -196,23 +271,125 @@ name = "Python"
 version = 3.9
 print(f"Welcome to {name} {version}!")`,
           },
+          {
+            title: "Variables and Data Types",
+            content: "Understanding different data types and how to work with them.",
+            codeExample: `# Numbers
+age = 25
+height = 5.9
+
+# Strings
+name = "Alice"
+message = f"Hello, {name}!"
+
+# Lists
+fruits = ["apple", "banana", "orange"]
+print(fruits[0])`,
+          },
         ],
         summary:
           "Python's simplicity makes it perfect for beginners while being powerful enough for complex applications.",
       },
     },
     {
-      id: "5",
+      id: "6",
+      title: "Data Analysis with Pandas",
+      description: "Work with data using the powerful Pandas library",
+      category: "Data Science",
+      duration: 180,
+      progress: 0,
+      completed: false,
+      difficulty: "intermediate",
+      icon: "📊",
+      skillId: "pandas",
+      prerequisites: ["5"],
+      content: {
+        introduction:
+          "Pandas is a powerful Python library for data manipulation and analysis. It provides data structures and functions needed to work with structured data.",
+        sections: [
+          {
+            title: "DataFrames and Series",
+            content: "Learn about the core data structures in Pandas.",
+            codeExample: `import pandas as pd
+
+# Creating a DataFrame
+data = {
+    'Name': ['Alice', 'Bob', 'Charlie'],
+    'Age': [25, 30, 35],
+    'City': ['New York', 'London', 'Tokyo']
+}
+df = pd.DataFrame(data)
+print(df)`,
+          },
+          {
+            title: "Data Cleaning",
+            content: "Essential techniques for cleaning and preparing data.",
+            codeExample: `# Handling missing values
+df.dropna()  # Remove rows with missing values
+df.fillna(0)  # Fill missing values with 0
+
+# Data filtering
+young_people = df[df['Age'] < 30]`,
+          },
+        ],
+        summary:
+          "Pandas is essential for data analysis, providing powerful tools to clean, transform, and analyze data.",
+      },
+    },
+    {
+      id: "7",
+      title: "Machine Learning Fundamentals",
+      description: "Build intelligent systems with machine learning",
+      category: "Data Science",
+      duration: 240,
+      progress: 0,
+      completed: false,
+      difficulty: "advanced",
+      icon: "🤖",
+      skillId: "ml",
+      prerequisites: ["6"],
+      content: {
+        introduction:
+          "Machine Learning enables computers to learn and make decisions from data without being explicitly programmed for every scenario.",
+        sections: [
+          {
+            title: "Types of Machine Learning",
+            content: "Understanding supervised, unsupervised, and reinforcement learning.",
+          },
+          {
+            title: "Your First Model",
+            content: "Build a simple linear regression model.",
+            codeExample: `from sklearn.linear_model import LinearRegression
+import numpy as np
+
+# Sample data
+X = np.array([[1], [2], [3], [4], [5]])
+y = np.array([2, 4, 6, 8, 10])
+
+# Create and train model
+model = LinearRegression()
+model.fit(X, y)
+
+# Make predictions
+prediction = model.predict([[6]])
+print(f"Prediction: {prediction}")`,
+          },
+        ],
+        summary: "Machine learning opens doors to AI applications, from recommendation systems to autonomous vehicles.",
+      },
+    },
+    {
+      id: "8",
       title: "Design Principles",
       description: "Learn color theory, typography, and layout principles",
       category: "Design",
       duration: 75,
-      progress: 50,
+      progress: 0,
       completed: false,
       difficulty: "beginner",
       icon: "🎭",
       skillId: "design",
-      prerequisites: [],
+      prerequisites: ["0"],
       content: {
         introduction:
           "Good design principles create visually appealing and user-friendly interfaces that communicate effectively.",
@@ -225,38 +402,81 @@ print(f"Welcome to {name} {version}!")`,
             title: "Typography",
             content: "Choosing and pairing fonts for readability and visual hierarchy.",
           },
+          {
+            title: "Layout and Composition",
+            content: "Creating balanced, harmonious designs using grids and spacing.",
+          },
         ],
         summary:
           "Design principles guide the creation of beautiful, functional interfaces that users love to interact with.",
       },
     },
     {
-      id: "6",
-      title: "React Components",
-      description: "Build reusable UI components with React",
-      category: "Web Development",
-      duration: 150,
+      id: "9",
+      title: "User Experience Design",
+      description: "Create user-friendly interfaces and experiences",
+      category: "Design",
+      duration: 120,
       progress: 0,
       completed: false,
-      difficulty: "advanced",
-      icon: "⚛️",
-      skillId: "react",
-      prerequisites: ["1", "2", "3"],
+      difficulty: "intermediate",
+      icon: "👤",
+      skillId: "ux",
+      prerequisites: ["8"],
       content: {
         introduction:
-          "React components are the building blocks of React applications, allowing you to create reusable UI elements.",
+          "User Experience (UX) design focuses on creating meaningful and relevant experiences for users when they interact with products.",
         sections: [
           {
-            title: "Functional Components",
-            content: "Learn how to create components using functions.",
-            codeExample: `function Welcome(props) {
-  return <h1>Hello, {props.name}!</h1>;
-}
-
-export default Welcome;`,
+            title: "User Research",
+            content: "Understanding your users through interviews, surveys, and observation.",
+          },
+          {
+            title: "Information Architecture",
+            content: "Organizing and structuring content for optimal user navigation.",
+          },
+          {
+            title: "Wireframing and Prototyping",
+            content: "Creating low and high-fidelity representations of your designs.",
           },
         ],
-        summary: "React components enable modular, maintainable code that scales with your application's complexity.",
+        summary: "UX design ensures that products are not just beautiful, but also functional and user-centered.",
+      },
+    },
+    {
+      id: "10",
+      title: "Figma Mastery",
+      description: "Design with professional tools and collaborate effectively",
+      category: "Design",
+      duration: 90,
+      progress: 0,
+      completed: false,
+      difficulty: "intermediate",
+      icon: "🔧",
+      skillId: "figma",
+      prerequisites: ["9"],
+      content: {
+        introduction:
+          "Figma is a powerful design tool that enables designers to create, prototype, and collaborate on digital designs in real-time.",
+        sections: [
+          {
+            title: "Interface and Tools",
+            content: "Getting familiar with Figma's interface and essential design tools.",
+          },
+          {
+            title: "Components and Design Systems",
+            content: "Creating reusable components and maintaining design consistency.",
+          },
+          {
+            title: "Prototyping and Animation",
+            content: "Bringing your designs to life with interactive prototypes.",
+          },
+          {
+            title: "Collaboration Features",
+            content: "Working with teams, sharing designs, and gathering feedback.",
+          },
+        ],
+        summary: "Figma mastery enables professional design workflows and seamless team collaboration.",
       },
     },
   ])
@@ -308,6 +528,8 @@ export default Welcome;`,
         return "border-l-purple-500"
       case "Design":
         return "border-l-pink-500"
+      case "Data Science":
+        return "border-l-orange-500"
       default:
         return "border-l-gray-500"
     }
