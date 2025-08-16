@@ -4,8 +4,11 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Trophy, BookOpen, Target } from "lucide-react"
+import { Trophy, BookOpen, Target, LogOut } from "lucide-react"
+import { signOut } from "@/lib/actions"
+import type { User } from "@supabase/supabase-js"
 
 interface UserStats {
   level: number
@@ -26,7 +29,11 @@ interface Achievement {
   rarity: "common" | "rare" | "epic" | "legendary"
 }
 
-export function UserProfile() {
+interface UserProfileProps {
+  user: User
+}
+
+export function UserProfile({ user }: UserProfileProps) {
   const [userStats] = useState<UserStats>({
     level: 12,
     experience: 2450,
@@ -104,7 +111,9 @@ export function UserProfile() {
           <div className="relative">
             <Avatar className="w-20 h-20 border-4 border-primary glow-effect">
               <AvatarImage src="/fantasy-wizard-avatar.png" alt="User Avatar" />
-              <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">W</AvatarFallback>
+              <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
+                {user.email?.charAt(0).toUpperCase() || "U"}
+              </AvatarFallback>
             </Avatar>
             <div className="absolute -bottom-2 -right-2 bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
               {userStats.level}
@@ -112,9 +121,17 @@ export function UserProfile() {
           </div>
 
           <div className="text-center">
-            <h2 className="text-xl font-bold text-foreground">Wizard Learner</h2>
+            <h2 className="text-xl font-bold text-foreground">{user.email}</h2>
             <p className={`text-lg font-semibold ${getLevelColor(userStats.level)}`}>Level {userStats.level}</p>
           </div>
+
+          {/* Sign Out Button */}
+          <form action={signOut} className="w-full">
+            <Button type="submit" variant="outline" className="w-full bg-transparent">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </form>
         </div>
       </Card>
 
