@@ -6,7 +6,7 @@ import { useState, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react"
+import { ZoomIn, ZoomOut, RotateCcw, X } from "lucide-react"
 
 interface SkillNode {
   id: string
@@ -226,6 +226,17 @@ export function SkillMap() {
     }
   }
 
+  const handleLearnSkill = (skillId: string) => {
+    console.log(`[v0] Starting to learn skill: ${skillId}`)
+    // This would typically update the skill progress and user stats
+    // For now, we'll just log the action
+    setSelectedSkill(null) // Close the preview after starting to learn
+  }
+
+  const closeSkillPreview = () => {
+    setSelectedSkill(null)
+  }
+
   return (
     <div className="h-full flex">
       {/* Map Area */}
@@ -331,6 +342,13 @@ export function SkillMap() {
       {selectedSkill && (
         <div className="w-80 ml-4">
           <Card className="p-6 bg-card border-border h-fit">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1" />
+              <Button variant="ghost" size="sm" onClick={closeSkillPreview} className="h-8 w-8 p-0 hover:bg-muted">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div
@@ -379,7 +397,11 @@ export function SkillMap() {
                 </div>
               )}
 
-              <Button className="w-full" disabled={!selectedSkill.unlocked || selectedSkill.completed}>
+              <Button
+                className="w-full"
+                disabled={!selectedSkill.unlocked || selectedSkill.completed}
+                onClick={() => selectedSkill.unlocked && !selectedSkill.completed && handleLearnSkill(selectedSkill.id)}
+              >
                 {selectedSkill.completed ? "Completed" : selectedSkill.unlocked ? "Learn" : "Locked"}
               </Button>
             </div>

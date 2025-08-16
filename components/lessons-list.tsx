@@ -20,7 +20,7 @@ interface Lesson {
 }
 
 export function LessonsList() {
-  const [lessons] = useState<Lesson[]>([
+  const [lessons, setLessons] = useState<Lesson[]>([
     {
       id: "1",
       title: "Introduction to HTML",
@@ -116,8 +116,21 @@ export function LessonsList() {
   }
 
   const handleStudied = (lessonId: string) => {
-    // This would typically update the lesson progress and user stats
-    console.log(`Marked lesson ${lessonId} as studied`)
+    console.log(`Marking lesson ${lessonId} as studied`)
+    setLessons((prevLessons) =>
+      prevLessons.map((lesson) => (lesson.id === lessonId ? { ...lesson, progress: 100, completed: true } : lesson)),
+    )
+  }
+
+  const handleLearnLesson = (lessonId: string) => {
+    console.log(`Starting/continuing lesson: ${lessonId}`)
+    setLessons((prevLessons) =>
+      prevLessons.map((lesson) =>
+        lesson.id === lessonId
+          ? { ...lesson, progress: lesson.progress === 0 ? 25 : Math.min(100, lesson.progress + 25) }
+          : lesson,
+      ),
+    )
   }
 
   return (
@@ -188,7 +201,7 @@ export function LessonsList() {
                   </Button>
                 ) : lesson.progress > 0 ? (
                   <>
-                    <Button className="w-32">
+                    <Button className="w-32" onClick={() => handleLearnLesson(lesson.id)}>
                       <PlayCircle className="w-4 h-4 mr-2" />
                       Continue
                     </Button>
@@ -197,7 +210,7 @@ export function LessonsList() {
                     </Button>
                   </>
                 ) : (
-                  <Button className="w-32">
+                  <Button className="w-32" onClick={() => handleLearnLesson(lesson.id)}>
                     <PlayCircle className="w-4 h-4 mr-2" />
                     Start Learning
                   </Button>
