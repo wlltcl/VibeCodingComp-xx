@@ -173,15 +173,18 @@ export function SkillMap() {
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault()
-    const delta = e.deltaY > 0 ? -0.1 : 0.1
-    setScale((prev) => Math.max(0.5, Math.min(2, prev + delta)))
+    const delta = e.deltaY > 0 ? -0.15 : 0.15
+    setScale((prev) => Math.max(0.3, Math.min(3, prev + delta)))
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.target === mapRef.current) {
-      setIsDragging(true)
-      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
+    if ((e.target as HTMLElement).closest(".skill-node") || (e.target as HTMLElement).closest("button")) {
+      return
     }
+
+    setIsDragging(true)
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
+    e.preventDefault()
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -195,6 +198,12 @@ export function SkillMap() {
 
   const handleMouseUp = () => {
     setIsDragging(false)
+  }
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (selectedSkill && !(e.target as HTMLElement).closest(".skill-node")) {
+      setSelectedSkill(null)
+    }
   }
 
   const resetView = () => {
@@ -226,7 +235,7 @@ export function SkillMap() {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setScale((prev) => Math.min(2, prev + 0.2))}
+            onClick={() => setScale((prev) => Math.min(3, prev + 0.2))}
             className="bg-card border-border"
           >
             <ZoomIn className="w-4 h-4" />
@@ -234,7 +243,7 @@ export function SkillMap() {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setScale((prev) => Math.max(0.5, prev - 0.2))}
+            onClick={() => setScale((prev) => Math.max(0.3, prev - 0.2))}
             className="bg-card border-border"
           >
             <ZoomOut className="w-4 h-4" />
@@ -247,18 +256,20 @@ export function SkillMap() {
         {/* Skill Map */}
         <div
           ref={mapRef}
-          className="w-full h-full cursor-grab active:cursor-grabbing"
+          className="w-full h-full cursor-grab active:cursor-grabbing select-none"
           onWheel={handleWheel}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onDoubleClick={handleDoubleClick}
         >
           <div
             className="relative w-full h-full"
             style={{
               transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
               transformOrigin: "center center",
+              transition: isDragging ? "none" : "transform 0.1s ease-out",
             }}
           >
             {/* Connection Lines */}
@@ -288,7 +299,7 @@ export function SkillMap() {
             {skillNodes.map((node) => (
               <div
                 key={node.id}
-                className={`absolute w-16 h-16 rounded-full border-4 flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 ${
+                className={`skill-node absolute w-16 h-16 rounded-full border-4 flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 ${
                   node.completed
                     ? `${getCategoryColor(node.category)} glow-effect`
                     : node.unlocked
@@ -299,7 +310,10 @@ export function SkillMap() {
                   left: node.x,
                   top: node.y,
                 }}
-                onClick={() => setSelectedSkill(node)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedSkill(node)
+                }}
               >
                 <span className="text-2xl">{node.icon}</span>
                 {node.completed && (
