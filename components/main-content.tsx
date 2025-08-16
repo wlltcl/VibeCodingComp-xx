@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SkillMap } from "@/components/skill-map"
 import { LessonsList } from "@/components/lessons-list"
@@ -8,7 +8,32 @@ import { LessonsList } from "@/components/lessons-list"
 export function MainContent() {
   const [activeTab, setActiveTab] = useState("map")
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null)
-  const [completedSkills, setCompletedSkills] = useState<string[]>(["start", "html"]) // Track completed skills
+  const [completedSkills, setCompletedSkills] = useState<string[]>([])
+  const [completedLessons, setCompletedLessons] = useState<string[]>([])
+
+  useEffect(() => {
+    const savedSkills = localStorage.getItem("completedSkills")
+    const savedLessons = localStorage.getItem("completedLessons")
+
+    if (savedSkills) {
+      setCompletedSkills(JSON.parse(savedSkills))
+    } else {
+      // Default starting skills
+      setCompletedSkills(["start", "html"])
+    }
+
+    if (savedLessons) {
+      setCompletedLessons(JSON.parse(savedLessons))
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem("completedSkills", JSON.stringify(completedSkills))
+  }, [completedSkills])
+
+  useEffect(() => {
+    localStorage.setItem("completedLessons", JSON.stringify(completedLessons))
+  }, [completedLessons])
 
   const handleNavigateToLesson = (skillId: string) => {
     // Map skill IDs to lesson IDs based on the skill-lesson relationship
@@ -32,7 +57,29 @@ export function MainContent() {
     console.log(`[v0] Lesson completed for skill: ${skillId}`)
 
     if (!completedSkills.includes(skillId)) {
-      setCompletedSkills((prev) => [...prev, skillId])
+      setCompletedSkills((prev) => {
+        const newSkills = [...prev, skillId]
+        console.log(`[v0] Updated completed skills:`, newSkills)
+        return newSkills
+      })
+    }
+
+    const skillToLessonMap: Record<string, string> = {
+      html: "1",
+      css: "2",
+      js: "3",
+      python: "4",
+      design: "5",
+      react: "6",
+    }
+
+    const lessonId = skillToLessonMap[skillId]
+    if (lessonId && !completedLessons.includes(lessonId)) {
+      setCompletedLessons((prev) => {
+        const newLessons = [...prev, lessonId]
+        console.log(`[v0] Updated completed lessons:`, newLessons)
+        return newLessons
+      })
     }
   }
 
@@ -63,6 +110,7 @@ export function MainContent() {
             selectedLessonId={selectedLessonId}
             onLessonSelect={setSelectedLessonId}
             onLessonComplete={handleLessonComplete}
+            completedLessons={completedLessons}
           />
         </TabsContent>
       </Tabs>

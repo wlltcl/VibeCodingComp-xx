@@ -34,9 +34,15 @@ interface LessonsListProps {
   selectedLessonId?: string | null
   onLessonSelect?: (lessonId: string | null) => void
   onLessonComplete?: (skillId: string) => void // Added callback for lesson completion
+  completedLessons?: string[] // Added completedLessons prop to sync with persistent state
 }
 
-export function LessonsList({ selectedLessonId, onLessonSelect, onLessonComplete }: LessonsListProps) {
+export function LessonsList({
+  selectedLessonId,
+  onLessonSelect,
+  onLessonComplete,
+  completedLessons = [],
+}: LessonsListProps) {
   const [lessons, setLessons] = useState<Lesson[]>([
     {
       id: "1",
@@ -283,6 +289,7 @@ export default Welcome;`,
       prevLessons.map((lesson) => {
         if (lesson.id === lessonId) {
           const updatedLesson = { ...lesson, progress: 100, completed: true }
+          saveLessonProgress(lessonId, 100)
           if (lesson.skillId && onLessonComplete) {
             setTimeout(() => {
               onLessonComplete(lesson.skillId!)
@@ -307,6 +314,8 @@ export default Welcome;`,
             const newProgress = lesson.progress === 0 ? 25 : Math.min(100, lesson.progress + 25)
             const isCompleted = newProgress === 100
 
+            saveLessonProgress(lessonId, newProgress)
+
             if (isCompleted && lesson.skillId && onLessonComplete) {
               setTimeout(() => {
                 onLessonComplete(lesson.skillId!)
@@ -325,6 +334,24 @@ export default Welcome;`,
     setIsLessonModalOpen(false)
     setSelectedLesson(null)
   }
+
+  const saveLessonProgress = (lessonId: string, progress: number) => {
+    localStorage.setItem(`lesson-${lessonId}-progress`, progress.toString())
+  }
+
+  useEffect(() => {
+    setLessons((prevLessons) =>
+      prevLessons.map((lesson) => ({
+        ...lesson,
+        completed: completedLessons.includes(lesson.id),
+        progress: completedLessons.includes(lesson.id)
+          ? 100
+          : localStorage.getItem(`lesson-${lesson.id}-progress`)
+            ? Number.parseInt(localStorage.getItem(`lesson-${lesson.id}-progress`)!)
+            : lesson.progress,
+      })),
+    )
+  }, [completedLessons])
 
   useEffect(() => {
     if (selectedLessonId) {
