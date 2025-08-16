@@ -515,14 +515,13 @@ export default Welcome;`,
               </div>
 
               <div className="flex gap-2 pt-4 border-t">
-                <Button onClick={closeLessonModal} className="flex-1">
-                  Continue Learning
+                <Button onClick={closeLessonModal} variant="outline" className="flex-1 bg-transparent">
+                  Close Lesson
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => {
                     handleStudied(selectedLesson.id)
-                    closeLessonModal()
                   }}
                 >
                   Mark as Completed
