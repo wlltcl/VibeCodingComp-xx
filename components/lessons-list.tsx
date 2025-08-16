@@ -284,7 +284,9 @@ export default Welcome;`,
         if (lesson.id === lessonId) {
           const updatedLesson = { ...lesson, progress: 100, completed: true }
           if (lesson.skillId && onLessonComplete) {
-            onLessonComplete(lesson.skillId)
+            setTimeout(() => {
+              onLessonComplete(lesson.skillId!)
+            }, 0)
           }
           return updatedLesson
         }
@@ -306,7 +308,9 @@ export default Welcome;`,
             const isCompleted = newProgress === 100
 
             if (isCompleted && lesson.skillId && onLessonComplete) {
-              onLessonComplete(lesson.skillId)
+              setTimeout(() => {
+                onLessonComplete(lesson.skillId!)
+              }, 0)
             }
 
             return { ...lesson, progress: newProgress, completed: isCompleted }
