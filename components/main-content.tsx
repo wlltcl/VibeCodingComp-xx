@@ -8,6 +8,7 @@ import { LessonsList } from "@/components/lessons-list"
 export function MainContent() {
   const [activeTab, setActiveTab] = useState("map")
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null)
+  const [completedSkills, setCompletedSkills] = useState<string[]>(["start", "html"]) // Track completed skills
 
   const handleNavigateToLesson = (skillId: string) => {
     // Map skill IDs to lesson IDs based on the skill-lesson relationship
@@ -24,6 +25,14 @@ export function MainContent() {
     if (lessonId) {
       setSelectedLessonId(lessonId)
       setActiveTab("lessons")
+    }
+  }
+
+  const handleLessonComplete = (skillId: string) => {
+    console.log(`[v0] Lesson completed for skill: ${skillId}`)
+
+    if (!completedSkills.includes(skillId)) {
+      setCompletedSkills((prev) => [...prev, skillId])
     }
   }
 
@@ -46,11 +55,15 @@ export function MainContent() {
         </TabsList>
 
         <TabsContent value="map" className="flex-1 mt-4">
-          <SkillMap onNavigateToLesson={handleNavigateToLesson} />
+          <SkillMap onNavigateToLesson={handleNavigateToLesson} completedSkills={completedSkills} />
         </TabsContent>
 
         <TabsContent value="lessons" className="flex-1 mt-4">
-          <LessonsList selectedLessonId={selectedLessonId} onLessonSelect={setSelectedLessonId} />
+          <LessonsList
+            selectedLessonId={selectedLessonId}
+            onLessonSelect={setSelectedLessonId}
+            onLessonComplete={handleLessonComplete}
+          />
         </TabsContent>
       </Tabs>
     </div>

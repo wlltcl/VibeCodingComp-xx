@@ -23,9 +23,10 @@ interface SkillNode {
 
 interface SkillMapProps {
   onNavigateToLesson?: (skillId: string) => void
+  completedSkills?: string[] // Added prop to receive completed skills
 }
 
-export function SkillMap({ onNavigateToLesson }: SkillMapProps) {
+export function SkillMap({ onNavigateToLesson, completedSkills = [] }: SkillMapProps) {
   const [selectedSkill, setSelectedSkill] = useState<SkillNode | null>(null)
   const [scale, setScale] = useState(1)
   const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -33,147 +34,140 @@ export function SkillMap({ onNavigateToLesson }: SkillMapProps) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const mapRef = useRef<HTMLDivElement>(null)
 
-  const skillNodes: SkillNode[] = [
-    // Center node
-    {
-      id: "start",
-      name: "Learning Journey",
-      description: "Begin your adventure",
-      x: 400,
-      y: 300,
-      unlocked: true,
-      completed: true,
-      prerequisites: [],
-      category: "core",
-      icon: "🎯",
-    },
+  const getSkillNodes = (): SkillNode[] => {
+    const baseSkillNodes: Omit<SkillNode, "unlocked" | "completed">[] = [
+      // Center node
+      {
+        id: "start",
+        name: "Learning Journey",
+        description: "Begin your adventure",
+        x: 400,
+        y: 300,
+        prerequisites: [],
+        category: "core",
+        icon: "🎯",
+      },
 
-    // Programming branch
-    {
-      id: "html",
-      name: "HTML Basics",
-      description: "Learn the structure of web pages",
-      x: 300,
-      y: 200,
-      unlocked: true,
-      completed: true,
-      prerequisites: ["start"],
-      category: "web",
-      icon: "🌐",
-    },
-    {
-      id: "css",
-      name: "CSS Styling",
-      description: "Make your pages beautiful",
-      x: 200,
-      y: 150,
-      unlocked: true,
-      completed: false,
-      prerequisites: ["html"],
-      category: "web",
-      icon: "🎨",
-    },
-    {
-      id: "js",
-      name: "JavaScript",
-      description: "Add interactivity to your sites",
-      x: 400,
-      y: 100,
-      unlocked: true,
-      completed: false,
-      prerequisites: ["html"],
-      category: "web",
-      icon: "⚡",
-    },
-    {
-      id: "react",
-      name: "React",
-      description: "Build modern web applications",
-      x: 500,
-      y: 50,
-      unlocked: false,
-      completed: false,
-      prerequisites: ["js"],
-      category: "web",
-      icon: "⚛️",
-    },
+      // Programming branch
+      {
+        id: "html",
+        name: "HTML Basics",
+        description: "Learn the structure of web pages",
+        x: 300,
+        y: 200,
+        prerequisites: ["start"],
+        category: "web",
+        icon: "🌐",
+      },
+      {
+        id: "css",
+        name: "CSS Styling",
+        description: "Make your pages beautiful",
+        x: 200,
+        y: 150,
+        prerequisites: ["html"],
+        category: "web",
+        icon: "🎨",
+      },
+      {
+        id: "js",
+        name: "JavaScript",
+        description: "Add interactivity to your sites",
+        x: 400,
+        y: 100,
+        prerequisites: ["html"],
+        category: "web",
+        icon: "⚡",
+      },
+      {
+        id: "react",
+        name: "React",
+        description: "Build modern web applications",
+        x: 500,
+        y: 50,
+        prerequisites: ["js"],
+        category: "web",
+        icon: "⚛️",
+      },
 
-    // Data Science branch
-    {
-      id: "python",
-      name: "Python Basics",
-      description: "Learn programming fundamentals",
-      x: 500,
-      y: 200,
-      unlocked: true,
-      completed: false,
-      prerequisites: ["start"],
-      category: "data",
-      icon: "🐍",
-    },
-    {
-      id: "pandas",
-      name: "Data Analysis",
-      description: "Work with data using Pandas",
-      x: 600,
-      y: 150,
-      unlocked: false,
-      completed: false,
-      prerequisites: ["python"],
-      category: "data",
-      icon: "📊",
-    },
-    {
-      id: "ml",
-      name: "Machine Learning",
-      description: "Build intelligent systems",
-      x: 700,
-      y: 100,
-      unlocked: false,
-      completed: false,
-      prerequisites: ["pandas"],
-      category: "data",
-      icon: "🤖",
-    },
+      // Data Science branch
+      {
+        id: "python",
+        name: "Python Basics",
+        description: "Learn programming fundamentals",
+        x: 500,
+        y: 200,
+        prerequisites: ["start"],
+        category: "data",
+        icon: "🐍",
+      },
+      {
+        id: "pandas",
+        name: "Data Analysis",
+        description: "Work with data using Pandas",
+        x: 600,
+        y: 150,
+        prerequisites: ["python"],
+        category: "data",
+        icon: "📊",
+      },
+      {
+        id: "ml",
+        name: "Machine Learning",
+        description: "Build intelligent systems",
+        x: 700,
+        y: 100,
+        prerequisites: ["pandas"],
+        category: "data",
+        icon: "🤖",
+      },
 
-    // Design branch
-    {
-      id: "design",
-      name: "Design Principles",
-      description: "Learn visual design basics",
-      x: 300,
-      y: 400,
-      unlocked: true,
-      completed: false,
-      prerequisites: ["start"],
-      category: "design",
-      icon: "🎭",
-    },
-    {
-      id: "ux",
-      name: "User Experience",
-      description: "Create user-friendly interfaces",
-      x: 200,
-      y: 450,
-      unlocked: false,
-      completed: false,
-      prerequisites: ["design"],
-      category: "design",
-      icon: "👤",
-    },
-    {
-      id: "figma",
-      name: "Figma Mastery",
-      description: "Design with professional tools",
-      x: 100,
-      y: 400,
-      unlocked: false,
-      completed: false,
-      prerequisites: ["ux"],
-      category: "design",
-      icon: "🔧",
-    },
-  ]
+      // Design branch
+      {
+        id: "design",
+        name: "Design Principles",
+        description: "Learn visual design basics",
+        x: 300,
+        y: 400,
+        prerequisites: ["start"],
+        category: "design",
+        icon: "🎭",
+      },
+      {
+        id: "ux",
+        name: "User Experience",
+        description: "Create user-friendly interfaces",
+        x: 200,
+        y: 450,
+        prerequisites: ["design"],
+        category: "design",
+        icon: "👤",
+      },
+      {
+        id: "figma",
+        name: "Figma Mastery",
+        description: "Design with professional tools",
+        x: 100,
+        y: 400,
+        prerequisites: ["ux"],
+        category: "design",
+        icon: "🔧",
+      },
+    ]
+
+    return baseSkillNodes.map((skill) => {
+      const completed = completedSkills.includes(skill.id)
+      const unlocked = skill.prerequisites.every((prereq) => completedSkills.includes(prereq))
+
+      return {
+        ...skill,
+        completed,
+        unlocked,
+      }
+    })
+  }
+
+  const skillNodes = getSkillNodes()
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault()

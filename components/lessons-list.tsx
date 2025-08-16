@@ -18,6 +18,7 @@ interface Lesson {
   completed: boolean
   difficulty: "beginner" | "intermediate" | "advanced"
   icon: string
+  skillId?: string // Added skillId to map lessons to skills
   content: {
     introduction: string
     sections: Array<{
@@ -32,9 +33,10 @@ interface Lesson {
 interface LessonsListProps {
   selectedLessonId?: string | null
   onLessonSelect?: (lessonId: string | null) => void
+  onLessonComplete?: (skillId: string) => void // Added callback for lesson completion
 }
 
-export function LessonsList({ selectedLessonId, onLessonSelect }: LessonsListProps) {
+export function LessonsList({ selectedLessonId, onLessonSelect, onLessonComplete }: LessonsListProps) {
   const [lessons, setLessons] = useState<Lesson[]>([
     {
       id: "1",
@@ -46,6 +48,7 @@ export function LessonsList({ selectedLessonId, onLessonSelect }: LessonsListPro
       completed: true,
       difficulty: "beginner",
       icon: "🌐",
+      skillId: "html", // Added skillId mapping
       content: {
         introduction:
           "HTML (HyperText Markup Language) is the standard markup language for creating web pages. It describes the structure of a web page using elements and tags.",
@@ -86,6 +89,7 @@ export function LessonsList({ selectedLessonId, onLessonSelect }: LessonsListPro
       completed: false,
       difficulty: "beginner",
       icon: "🎨",
+      skillId: "css", // Added skillId mapping
       content: {
         introduction:
           "CSS (Cascading Style Sheets) is used to style and layout web pages. It controls colors, fonts, spacing, and positioning.",
@@ -127,6 +131,7 @@ h1 { color: blue; }
       completed: false,
       difficulty: "intermediate",
       icon: "⚡",
+      skillId: "js", // Added skillId mapping
       content: {
         introduction:
           "JavaScript is a programming language that adds interactivity to web pages. It can manipulate HTML elements, handle events, and create dynamic content.",
@@ -165,6 +170,7 @@ console.log(result);`,
       completed: false,
       difficulty: "beginner",
       icon: "🐍",
+      skillId: "python", // Added skillId mapping
       content: {
         introduction:
           "Python is a versatile, beginner-friendly programming language known for its simple syntax and powerful capabilities.",
@@ -194,6 +200,7 @@ print(f"Welcome to {name} {version}!")`,
       completed: false,
       difficulty: "beginner",
       icon: "🎭",
+      skillId: "design", // Added skillId mapping
       content: {
         introduction:
           "Good design principles create visually appealing and user-friendly interfaces that communicate effectively.",
@@ -221,6 +228,7 @@ print(f"Welcome to {name} {version}!")`,
       completed: false,
       difficulty: "advanced",
       icon: "⚛️",
+      skillId: "react", // Added skillId mapping
       content: {
         introduction:
           "React components are the building blocks of React applications, allowing you to create reusable UI elements.",
@@ -272,7 +280,16 @@ export default Welcome;`,
   const handleStudied = (lessonId: string) => {
     console.log(`Marking lesson ${lessonId} as studied`)
     setLessons((prevLessons) =>
-      prevLessons.map((lesson) => (lesson.id === lessonId ? { ...lesson, progress: 100, completed: true } : lesson)),
+      prevLessons.map((lesson) => {
+        if (lesson.id === lessonId) {
+          const updatedLesson = { ...lesson, progress: 100, completed: true }
+          if (lesson.skillId && onLessonComplete) {
+            onLessonComplete(lesson.skillId)
+          }
+          return updatedLesson
+        }
+        return lesson
+      }),
     )
   }
 
@@ -283,11 +300,19 @@ export default Welcome;`,
       setSelectedLesson(lesson)
       setIsLessonModalOpen(true)
       setLessons((prevLessons) =>
-        prevLessons.map((lesson) =>
-          lesson.id === lessonId
-            ? { ...lesson, progress: lesson.progress === 0 ? 25 : Math.min(100, lesson.progress + 25) }
-            : lesson,
-        ),
+        prevLessons.map((lesson) => {
+          if (lesson.id === lessonId) {
+            const newProgress = lesson.progress === 0 ? 25 : Math.min(100, lesson.progress + 25)
+            const isCompleted = newProgress === 100
+
+            if (isCompleted && lesson.skillId && onLessonComplete) {
+              onLessonComplete(lesson.skillId)
+            }
+
+            return { ...lesson, progress: newProgress, completed: isCompleted }
+          }
+          return lesson
+        }),
       )
     }
   }
@@ -377,7 +402,7 @@ export default Welcome;`,
                 {lesson.completed ? (
                   <Button variant="outline" disabled className="w-32 bg-transparent">
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Completed
+                    Studied
                   </Button>
                 ) : lesson.progress > 0 ? (
                   <>
